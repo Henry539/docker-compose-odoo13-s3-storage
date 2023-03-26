@@ -1,8 +1,8 @@
 version: '3.7'
 services:
   web:
-    platform: linux/amd64
-    image: odoo:13.0
+    platform: linux/amd64 #Set up Linux platform
+    image: odoo:13.0 #Choose Odoo version
     restart: always
     depends_on:
       db:
