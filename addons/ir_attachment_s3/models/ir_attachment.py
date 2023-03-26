@@ -1,11 +1,3 @@
-# Copyright 2016-2018 Ildar Nasyrov <https://it-projects.info/team/iledarn>
-# Copyright 2016-2018 Ivan Yelizariev <https://it-projects.info/team/yelizariev>
-# Copyright 2019 Alexandr Kolushov <https://it-projects.info/team/KolushovAlexandr>
-# Copyright 2019 Rafis Bikbov <https://it-projects.info/team/RafiZz>
-# Copyright 2019 Dinar Gabbasov <https://it-projects.info/team/GabbasovDinar>
-# Copyright 2019-2020 Eugene Molotov <https://it-projects.info/team/em230418>
-# License MIT (https://opensource.org/licenses/MIT).
-
 import base64
 import logging
 
@@ -130,7 +122,6 @@ class IrAttachment(models.Model):
         if not bucket:
             return super(IrAttachment, self)._set_where_to_store(vals_list)
 
-        # TODO: тут игнорируется s3 condition и соотвествующий bucket пишется везде
         for values in vals_list:
             values["_bucket"] = bucket
 
@@ -143,15 +134,15 @@ class IrAttachment(models.Model):
                 bucket, bin_data, mimetype, checksum
             )
 
-        file_id = "{}".format(checksum)
+        fname, full_path = self._get_path(bin_data, checksum) #Get exactly fname (from filestore format)
 
         bucket.put_object(
-            Key=file_id,
+            Key=fname,
             Body=bin_data,
             ACL="public-read",
             ContentType=mimetype,
         )
 
-        _logger.debug("uploaded file with id {}".format(file_id))
-        obj_url = self.env["res.config.settings"].get_s3_obj_url(file_id)
-        return PREFIX + file_id, obj_url
+        _logger.debug("uploaded file with id {}".format(fname))
+        obj_url = self.env["res.config.settings"].get_s3_obj_url(fname)
+        return PREFIX + fname, obj_url
